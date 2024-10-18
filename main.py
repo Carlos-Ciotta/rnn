@@ -45,8 +45,7 @@ def dataProcessing_Pandas(samples):
     le = LabelEncoder()
     df_w['icon'] = le.fit_transform(df_w['icon'])
     df_w['summary'] = le.fit_transform(df_w['summary'])
-    '''
-    #not using anymore
+    
     #one_hot function to summary and icon
     icon_oh =keras.ops.one_hot(df_w['icon'], samples, axis=-1)
     summary_oh =keras.ops.one_hot(df_w['summary'], samples, axis=-1)
@@ -56,7 +55,7 @@ def dataProcessing_Pandas(samples):
     summary_oh = pd.DataFrame(summary_oh, columns=[f'summary_{i}' for i in range(summary_oh.shape[1])])
     
     df_w.drop(columns=['icon', 'summary'], inplace=True) #drop unused tables
-    '''
+    
     ###########  WEATHER DATA  ###########
     
     #dataframes concat
