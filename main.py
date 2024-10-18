@@ -29,7 +29,7 @@ def dataProcessing_Pandas(samples):
     df['minute'] = df['Data e Hora'].dt.minute
     
     
-    df['Geracao'] = df['Hídrica']+df['Eólica']+df['Solar']+df['Biomassa']+df['Ondas']+df['Gás Natural - Ciclo Combinado']+df['Gás natural - Cogeração']+df['Carvão']+df['Outra Térmica']+df['Bombagem']+df['Importação']
+    df['Geracao'] = df['Hídrica']+df['Eólica']+df['Solar']+df['Biomassa']+df['Ondas']+df['Gás Natural - Ciclo Combinado']+df['Gás natural - Cogeração']+df['Carvão']+df['Outra Térmica']+df['Bombagem']#+df['Importação']
     df['Generation - Consumption'] = df['Geracao'] - df['Consumo']
 
     df_processed = df[['day','hour','minute','Generation - Consumption']]
@@ -45,7 +45,8 @@ def dataProcessing_Pandas(samples):
     le = LabelEncoder()
     df_w['icon'] = le.fit_transform(df_w['icon'])
     df_w['summary'] = le.fit_transform(df_w['summary'])
-    
+    '''
+    #not using anymore
     #one_hot function to summary and icon
     icon_oh =keras.ops.one_hot(df_w['icon'], samples, axis=-1)
     summary_oh =keras.ops.one_hot(df_w['summary'], samples, axis=-1)
@@ -55,7 +56,7 @@ def dataProcessing_Pandas(samples):
     summary_oh = pd.DataFrame(summary_oh, columns=[f'summary_{i}' for i in range(summary_oh.shape[1])])
     
     df_w.drop(columns=['icon', 'summary'], inplace=True) #drop unused tables
-    
+    '''
     ###########  WEATHER DATA  ###########
     
     #dataframes concat
@@ -104,7 +105,7 @@ def dataProcessing_toNumpy(df_shuffled, data, samples):
     x_train = np.reshape(x_train, (num_train,steps, x_num))
     x_test = np.reshape(x_test, (num_test, steps,x_num))
 
-    return x_train, x_test, y_train, y_test
+    return x_train, x_test, y_train, y_test, scaler_y
 def remove_outliers(data, threshold=1.5):
     #Q1 e Q3
     Q1 = np.percentile(data, 25)
@@ -151,7 +152,7 @@ def RNN(x_train, x_test, y_train, y_test, eta, batch_size, epochs):
     model.fit(x_train, y_train, epochs=epochs, validation_data=(x_test, y_test),callbacks=[early_stopping], batch_size=batch_size)
 
     return model
-def prediction(model, x_test, y_test):
+def prediction(model, x_test, y_test, scaler_y):
     y_pred = model.predict(x_test)
     y_pred = scaler_y.inverse_transform(y_pred.reshape(-1, 1))
     y_test = scaler_y.inverse_transform(y_test.reshape(-1,1))
@@ -184,7 +185,7 @@ epochs = 1200
 
 data, df_shuffled = dataProcessing_Pandas(samples)
 data.head()
-x_train,x_test, y_train, y_test = dataProcessing_toNumpy(df_shuffled, data, samples)
+x_train,x_test, y_train, y_test, scaler = dataProcessing_toNumpy(df_shuffled, data, samples)
 #print('y_train:',y_train)
 #print('x_train:',x_train)
 #plt.boxplot(y_train)
@@ -197,5 +198,5 @@ x_train,x_test, y_train, y_test = dataProcessing_toNumpy(df_shuffled, data, samp
 #plt.boxplot(y_train_clean)
 
 model = RNN(x_train, x_test, y_train, y_test, eta, batch_size, epochs)
-y_pred, y_test = prediction(model, x_test, y_test)
+y_pred, y_test = prediction(model, x_test, y_test, scaler)
 plot_prediction(y_pred, y_test)
