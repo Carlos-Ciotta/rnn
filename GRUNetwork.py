@@ -11,22 +11,19 @@ class GRUNetwork:
     def __init__(self,x_train, x_test, y_train, y_test, eta, batch_size, epochs):
         self.model = Sequential()
 
-        self.model.add(GRU(75, return_sequences=True, input_shape = (x_train.shape[1], x_train.shape[2]), activation ='relu'))
-        self.model.add(Dropout(0.3))
+        self.model.add(GRU(100, return_sequences=True, input_shape = (x_train.shape[1], x_train.shape[2]), activation ='relu'))
+        self.model.add(Dropout(0.5))
 
         self.model.add(GRU(50, return_sequences=True, activation ='relu'))
-        self.model.add(Dropout(0.3))
-
-        self.model.add(GRU(35, return_sequences=False, activation ='relu'))
-        self.model.add(Dropout(0.3))
-
-        self.model.add(Dense(20))
-        self.model.add(Dropout(0.3))
+        self.model.add(Dropout(0.5))
+        
+        self.model.add(GRU(25, return_sequences=False, activation ='relu'))
+        self.model.add(Dropout(0.5))
 
         self.model.add(Dense(1))
 
         self.optimizer = Adam(learning_rate=eta)
-        self.early_stopping = EarlyStopping(monitor='val_loss', patience=int(epochs*0.8), restore_best_weights=True)
+        self.early_stopping = EarlyStopping(monitor='val_loss', patience=int(epochs*0.4), restore_best_weights=True)
 
         self.model.compile(optimizer=self.optimizer, loss='mean_squared_error', metrics = ['mae'])
 
@@ -54,8 +51,8 @@ class GRUNetwork:
         plt.figure(figsize=(10, 6))
 
         # Ploting lines
-        plt.plot(y_test, label="Energy Consumption", color='blue', linestyle='dashed')
-        plt.plot(y_pred[:, 0], label="Prediction", color='red', alpha=0.7)
+        plt.plot(y_test[:24,0], label="Energy Consumption", color='blue', linestyle='dashed')
+        plt.plot(y_pred[:24, 0], label="Prediction", color='red', alpha=0.7)
 
         # Title and Label
         plt.title("Real values x Predicted vales", fontsize=14)
